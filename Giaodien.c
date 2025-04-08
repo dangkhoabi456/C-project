@@ -4,7 +4,6 @@
 static void onClicked(GtkWidget *widget, gpointer data);
 static void onNhapBienSoXe(GtkWidget *widget, gpointer data);
 
-
 // Hàm callback được gọi khi ứng dụng khởi động
 static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window;
@@ -50,10 +49,33 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(button_box), button);
     gtk_box_pack_start(GTK_BOX(containerBox), button_box, FALSE, FALSE, 5);
 
+    // ==== TẠO NOTEBOOK (CÁC TAB) ====
+    GtkWidget *notebook = gtk_notebook_new();
+
+    // === TAB 1: Trang chủ ===
+    GtkWidget *tab_label1 = gtk_label_new("Trang chủ");
+    GtkWidget *tab_content1 = gtk_label_new("Chào mừng đến với hệ thống quản lý bãi giữ xe");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tab_content1, tab_label1);
+
+    // === TAB 2: Thống kê ===
+    GtkWidget *tab_label2 = gtk_label_new("Thống kê");
+    GtkWidget *tab_content2 = gtk_label_new("Dữ liệu thống kê xe vào/ra, doanh thu, v.v...");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tab_content2, tab_label2);
+
+    // === TAB 3: Bãi xe ===
+    GtkWidget *tab_label3 = gtk_label_new("Bãi xe");
+    GtkWidget *tab_content3 = gtk_label_new("Danh sách xe đang gửi tại bãi");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tab_content3, tab_label3);
+
+    // Thêm notebook vào container chính
+    gtk_box_pack_start(GTK_BOX(containerBox), notebook, TRUE, TRUE, 5);
+
     // ==== THÊM VÀO CỬA SỔ & HIỂN THỊ ====
     gtk_container_add(GTK_CONTAINER(window), containerBox);
     gtk_widget_show_all(window);
 }
+
+// Hàm xử lý nhập biển số
 static void onNhapBienSoXe(GtkWidget *widget, gpointer data) {
     GtkWidget *dialog;
     GtkWidget *content_area;
@@ -91,7 +113,6 @@ static void onNhapBienSoXe(GtkWidget *widget, gpointer data) {
 
     gtk_widget_destroy(dialog);
 }
-
 
 // Hàm xử lý sự kiện khi nhấn nút
 static void onClicked(GtkWidget *widget, gpointer data) {
