@@ -24,11 +24,11 @@ static void activate(GtkApplication *app, gpointer user_data) {
     // ==== TẠO VÀ THÊM 3 NÚT GÓC TRÊN PHẢI ====
     GtkWidget *top_right_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
-    GtkWidget *btn1 = gtk_button_new_with_label("Nhập biển số xe");
-    GtkWidget *btn2 = gtk_button_new_with_label("Thời điểm xe vào");
-    GtkWidget *btn3 = gtk_button_new_with_label("Thời điểm xe ra");
+    GtkWidget *btn1 = gtk_button_new_with_label("Thêm");
+    GtkWidget *btn2 = gtk_button_new_with_label("Xóa");
+    GtkWidget *btn3 = gtk_button_new_with_label("Thanh toán");
 
-	g_signal_connect(btn1, "clicked", G_CALLBACK(onNhapBienSoXe), window);
+    g_signal_connect(btn1, "clicked", G_CALLBACK(onNhapBienSoXe), window);
     g_signal_connect(btn2, "clicked", G_CALLBACK(onClicked), NULL);
     g_signal_connect(btn3, "clicked", G_CALLBACK(onClicked), NULL);
 
@@ -62,7 +62,7 @@ static void onNhapBienSoXe(GtkWidget *widget, gpointer data) {
     GtkWindow *parent_window = GTK_WINDOW(data); // truyền window vào làm cha
 
     // Tạo dialog
-    dialog = gtk_dialog_new_with_buttons("Nhập biển số xe",
+    dialog = gtk_dialog_new_with_buttons("Thêm",
                                          parent_window,
                                          GTK_DIALOG_MODAL,
                                          "_OK", GTK_RESPONSE_OK,
