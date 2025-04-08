@@ -64,8 +64,33 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     // === TAB 3: Bãi xe ===
     GtkWidget *tab_label3 = gtk_label_new("Bãi xe");
-    GtkWidget *tab_content3 = gtk_label_new("Danh sách xe đang gửi tại bãi");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tab_content3, tab_label3);
+    
+    // Tạo model cho danh sách xe (1 cột là biển số)
+    GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
+    GtkTreeIter iter;
+
+    // Thêm một số dòng mẫu
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "59A1-123.45", -1);
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "60B2-456.78", -1);
+
+    // Tạo TreeView
+    GtkWidget *treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+
+    // Tạo renderer để hiển thị text
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("Biển số xe", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    // Đặt treeview trong scrolled window để cuộn nếu quá nhiều dòng
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_container_add(GTK_CONTAINER(scrolled_window), treeview);
+
+    gtk_widget_set_vexpand(scrolled_window, TRUE);  // Cho phép giãn chiều cao
+    gtk_widget_set_hexpand(scrolled_window, TRUE);  // Cho phép giãn chiều rộng
+
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled_window, tab_label3);
 
     // Thêm notebook vào container chính
     gtk_box_pack_start(GTK_BOX(containerBox), notebook, TRUE, TRUE, 5);
@@ -83,27 +108,20 @@ static void onNhapBienSoXe(GtkWidget *widget, gpointer data) {
 
     GtkWindow *parent_window = GTK_WINDOW(data); // truyền window vào làm cha
 
-    // Tạo dialog
     dialog = gtk_dialog_new_with_buttons("Thêm",
                                          parent_window,
                                          GTK_DIALOG_MODAL,
                                          "_OK", GTK_RESPONSE_OK,
                                          "_Hủy", GTK_RESPONSE_CANCEL,
                                          NULL);
-
-    // Lấy phần hiển thị chính của dialog
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    // Tạo ô nhập
     entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "VD: 59A1-123.45");
-
-    // Thêm entry vào hộp thoại
     gtk_container_add(GTK_CONTAINER(content_area), entry);
 
     gtk_widget_show_all(dialog);
 
-    // Chờ người dùng phản hồi
     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
 
     if (response == GTK_RESPONSE_OK) {
@@ -123,16 +141,9 @@ int main(int argc, char **argv) {
     GtkApplication *app;
     int status;
 
-    // Tạo ứng dụng GTK
     app = gtk_application_new("hello.world", G_APPLICATION_FLAGS_NONE);
-
-    // Kết nối tín hiệu "activate" với hàm activate
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-
-    // Chạy ứng dụng
     status = g_application_run(G_APPLICATION(app), argc, argv);
-
-    // Giải phóng bộ nhớ
     g_object_unref(app);
     return status;
 }
