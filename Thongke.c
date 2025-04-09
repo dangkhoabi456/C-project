@@ -34,5 +34,5 @@ void show_total() {
 int main(){
 	double fee;
 	show_total();
-	
+	vehicle_sum();
 }
