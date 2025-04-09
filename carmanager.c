@@ -73,7 +73,7 @@ void remove_vehicle(const char *license_plate) {
     save_to_file();
 }//xe roi bai va tinh phi xe, phi = so gio do * 5
 
-void list_vehicles() {
+void vehicle_list() {
     printf("\nDanh sach xe trong bai:\n");
     for (int i = 0; i < num_vehicles; i++)
         printf("%d. Bien so: %s - Thoi gian vao: %ld\n", i + 1, vehicles[i].license_plate, vehicles[i].entry_time);
@@ -105,7 +105,7 @@ int main() {
                 remove_vehicle(license_plate);
                 break;
             case 3:
-                list_vehicles();
+                vehicle_list();
                 break;
             case 4:
                 return 0;
