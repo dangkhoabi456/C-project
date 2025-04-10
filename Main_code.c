@@ -31,6 +31,23 @@ void save_to_file(vehicle*new_vehicle){
     fprintf(pt, "%s %d %ld\n", new_vehicle->license_plate, new_vehicle->fee, new_vehicle->entry_time);
     fclose(pt);
 }
+void remove_vehicle(const char *license_plate) {
+    Vehicle *vehicle = find_vehicle(license_plate);
+    if (vehicle == NULL) {
+        printf("Khong tim thay xe!\n");
+        return;
+    }
+
+    for (int i = 0; i < num_vehicles; i++) {
+        if (strcmp(vehicles[i].license_plate, license_plate) == 0) {
+            for (int j = i; j < num_vehicles - 1; j++)
+                vehicles[j] = vehicles[j + 1];
+            num_vehicles--;
+            break;
+        }
+    }
+    save_to_file();
+}//xe roi bai 
 int main() {
     load_from_file();
     int choice;
