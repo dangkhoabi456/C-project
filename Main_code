@@ -3,6 +3,34 @@
 #include <string.h>
 #include <time.h>
 
+// Đọc dữ liệu từ file
+void read_from_file() {
+    FILE *pt = fopen("parking_data.txt", "r");
+    if (pt == NULL) return;
+
+    vehicle temp;
+    while (fscanf(pt, "%s %d %ld", temp.license_plate, &temp.fee, &temp.entry_time) == 3) {
+        if (num_vehicles < MAX_SLOTS) {
+            vehicle_list[num_vehicles++] = temp;
+        }
+    }
+    fclose(pt);
+}
+
+// Kiểm tra còn chỗ không
+int has_available_slot() {
+    return num_vehicles < MAX_SLOTS;
+}
+void save_to_file(vehicle*new_vehicle){
+	FILE *pt = fopen("parking_data.txt", "a");
+    if (pt == NULL) {
+        printf("Unable to open file to write!\n");
+        return;
+    }
+
+    fprintf(pt, "%s %d %ld\n", new_vehicle->license_plate, new_vehicle->fee, new_vehicle->entry_time);
+    fclose(pt);
+}
 int main() {
     load_from_file();
     int choice;
