@@ -2,118 +2,105 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
-//Tạo ra một list thông tin cơ bản cần có của một chiếc xe
-typedef struct{
-    char bien_so[20];
-    char kieu_xe[20];
-    char hang_xe[20];
-    int so_tien;
-    time_t intime;
-    }Xe;
-// Khởi tạo số lượng xe ở bãi
-#define Max_slot 100
-Xe slot_de_xe[Max_slot];
-int dem = 0;
-//Tạo hàm đọc file
-void DocDuLieuTuFile() {
-    FILE *f = fopen("parking_data.txt", "r");
-    if (f == NULL) return;
 
-    Xe temp;
-    while (fscanf(f, "%s %s %s %d %ld", temp.bien_so, temp.kieu_xe, temp.hang_xe, &temp.so_tien, &temp.intime) == 5) {
-        if (dem < Max_slot) {
-            slot_de_xe[dem++] = temp;
+typedef struct {
+    char license_plate[20];   // biển số xe
+    int fee;                  // số tiền
+    time_t entry_time;        // thời gian vào
+} vehicle;
+
+#define MAX_SLOTS 100
+vehicle vehicle_list[MAX_SLOTS];
+int num_vehicles = 0;
+
+// Đọc dữ liệu từ file
+void read_from_file() {
+    FILE *pt = fopen("parking_data.txt", "r");
+    if (pt == NULL) return;
+
+    vehicle temp;
+    while (fscanf(pt, "%s %d %ld", temp.license_plate, &temp.fee, &temp.entry_time) == 3) {
+        if (num_vehicles < MAX_SLOTS) {
+            vehicle_list[num_vehicles++] = temp;
         }
     }
-    fclose(f);
+    fclose(pt);
 }
-// Khởi tạo hàm kiểm tra xem còn chỗ gửi xe hay không
-int KiemTraChoTrong (){
-    return (dem < Max_slot);
+
+// Kiểm tra còn chỗ không
+int has_available_slot() {
+    return num_vehicles < MAX_SLOTS;
 }
-//Khởi tạo hàm thêm xe mới vào bãi
-void ThemXeMoi (){
-    if (!KiemTraChoTrong()){
-         printf ("Bai xe da het cho!\n");
-         return;// thoát ra khi bãi xe đầy!
-     }
-    Xe xe_moi;// thêm biến phụ xe mới
-    printf ("Nhap vao bien so xe: \n");
-    scanf ("%s",xe_moi.bien_so);
-    printf ("Nhap vao kieu xe (oto/xe may): \n");
-    scanf ("%s",xe_moi.kieu_xe);
-    printf ("Nhap vao hang xe: \n");
-    scanf ("%s",xe_moi.hang_xe);
-    if (islower(xe_moi.hang_xe[0])) {
-    xe_moi.hang_xe[0] = toupper(xe_moi.hang_xe[0]);
-    }
-    xe_moi.intime =  time(NULL); // lưu thời gian vào bãi
-    xe_moi.so_tien=0; //Lúc này chưa tính tiền
-    FILE *f = fopen("parking_data.txt", "a");
-    if (f == NULL) {
-        printf("Khong the mo file de ghi!\n");
+void save_to_file(vehicle*new_vehicle){
+	FILE *pt = fopen("parking_data.txt", "a");
+    if (pt == NULL) {
+        printf("Unable to open file to write!\n");
         return;
     }
 
-    // Ghi thông tin xe vào file (theo đúng thứ tự)
-    fprintf(f, "%s %s %s %d %ld\n",
-            xe_moi.bien_so,
-            xe_moi.kieu_xe,
-            xe_moi.hang_xe,
-            xe_moi.so_tien,
-            xe_moi.intime);
-
-    fclose(f);
-
-    slot_de_xe[dem++] = xe_moi;
-
-    printf("Da them xe thanh cong!\n");
-    
+    fprintf(pt, "%s %d %ld\n", new_vehicle->license_plate, new_vehicle->fee, new_vehicle->entry_time);
+    fclose(pt);
 }
-void HienThiXeTrongBai(){
-    if (dem==0){
-        printf ("Bai xe hien dang trong!\n");
+// Thêm xe mới
+void add_vehicle() {
+    if (!has_available_slot()) {
+        printf("The parking lot is full!\n");
         return;
     }
-    printf ("%-10d %-20s %-20s %-20s %-25s\n","STT","Bien so","Kieu xe","Hang xe","Thoi gian vao");
-    for (int i =0;i<dem;i++){
-        char timeStr[26]; // Chuỗi lưu để lưu thời gian
-        strftime(timeStr/*chuỗi lưu*/ , sizeof(timeStr), "%Y-%m-%d %H:%M:%S"/*Hiện thị giờ và ngày tháng*/,
-         localtime(&slot_de_xe[i].intime));
-         // dùng localtime để chuyển thành dữ liệu giờ mà mình có thể đọc được
-         //thời gian xe hiện ra mỗi xe thông qua vòng lặp i
-         printf ("%-10d %-20s %-20s %-20s %-25s\n",i,slot_de_xe[i].bien_so,slot_de_xe[i].kieu_xe,slot_de_xe[i].hang_xe, timeStr);
+
+    vehicle new_vehicle;
+    printf("Enter license plate: ");
+    scanf("%s", new_vehicle.license_plate);
+
+    new_vehicle.entry_time = time(NULL);
+    new_vehicle.fee = 0;
+    vehicle_list[num_vehicles++] = new_vehicle;
+    save_to_file(&new_vehicle);
+    printf("Vehicle added successfully!\n");
+}
+
+// Hiển thị danh sách xe
+void display_vehicle_list() {
+    if (num_vehicles == 0) {
+        printf("The parking lot is currently empty!\n");
+        return;
+    }
+
+    printf("%-5s %-20s %-25s %-25s\n", "No.", "License Plate", "Entry Time","Fee");
+    for (int i = 0; i < num_vehicles; i++) {
+        char time_str[26];
+        strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&vehicle_list[i].entry_time));
+        printf("%-5d %-20s %-25s %-25d\n", i + 1, vehicle_list[i].license_plate, time_str,vehicle_list[i].fee);
     }
 }
-int main (){
-	DocDuLieuTuFile(); // Đọc file khi bắt đầu chương trình
+
+// Main
+int main() {
+    read_from_file(); // Load data when program starts
+
     int choice;
-    do{
-        printf ("CHAO MUNG TOI HE THONG GUI & GIU XE! \n");
-        printf ("Hay chon lua chon cua ban: \n");
-        printf ("1.Them xe moi\n");
-        printf ("2.Hien thi danh sach xe\n");
-        printf ("3.Thoat!\n");
-        printf ("Nhap vao lua chon cua ban: \n");
-        scanf ("%d",&choice);
-        
-        switch (choice){
+    do {
+        printf("\n=== VEHICLE PARKING MANAGEMENT SYSTEM ===\n");
+        printf("1. Add new vehicle\n");
+        printf("2. Show vehicle list\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
             case 1:
-                ThemXeMoi();
+                add_vehicle();
                 break;
             case 2:
-                HienThiXeTrongBai();
+                display_vehicle_list();
                 break;
             case 3:
-                printf ("Tam biet!\n");
+                printf("Goodbye!\n");
                 break;
             default:
-                printf("Lựa chọn không hợp lệ!\n");
+                printf("Invalid choice!\n");
         }
     } while (choice != 3);
 
     return 0;
 }
-    
-
