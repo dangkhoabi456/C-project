@@ -1,1 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
+int main() {
+    load_from_file();
+    int choice;
+    char license_plate[20];
+
+    while (1) {
+        printf("\n=== Quan ly bai do xe ===\n");
+        printf("1. Them xe vao bai\n");
+        printf("2. Xe roi bai\n");
+        printf("3. Xem danh sach xe\n");
+        printf("4. Thoat\n");
+        printf("Chon chuc nang: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Nhap bien so xe: ");
+                scanf("%s", license_plate);
+                add_vehicle(license_plate);
+                break;
+            case 2:
+                printf("Nhap bien so xe: ");
+                scanf("%s", license_plate);
+                remove_vehicle(license_plate);
+                break;
+            case 3:
+                vehicle_list();
+                break;
+            case 4:
+                return 0;
+            default:
+                printf("Lua chon khong hop le!\n");
+        }
+    }
+}
