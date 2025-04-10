@@ -57,11 +57,6 @@ void remove_vehicle(const char *license_plate) {
         return;
     }
 
-    time_t exit_time = time(NULL);
-    double parked_hours = difftime(exit_time, vehicle->entry_time) / 3600.0;
-    double fee = parked_hours * 5000;
-    printf("Xe %s roi bai. Tong phi: %.2f VND\n", license_plate, fee);
-
     for (int i = 0; i < num_vehicles; i++) {
         if (strcmp(vehicles[i].license_plate, license_plate) == 0) {
             for (int j = i; j < num_vehicles - 1; j++)
@@ -71,7 +66,7 @@ void remove_vehicle(const char *license_plate) {
         }
     }
     save_to_file();
-}//xe roi bai va tinh phi xe, phi = so gio do * 5
+}//xe roi bai 
 
 void vehicle_list() {
     printf("\nDanh sach xe trong bai:\n");
