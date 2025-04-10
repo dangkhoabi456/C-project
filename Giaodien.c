@@ -39,17 +39,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_pack_start(GTK_BOX(containerBox), top_right_box, FALSE, FALSE, 5);
 
     // ==== LABEL ====
-    label = gtk_label_new("Tổng xe vào/xe ra và Tổng doanh thu");
+    label = gtk_label_new("Chào mừng tới hệ thống quản lý bãi giữ xe");
     gtk_box_pack_start(GTK_BOX(containerBox), label, FALSE, FALSE, 5);
-
-    // ==== NÚT "MỞ TAB" ====
-    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-    button = gtk_button_new_with_label("Mở tab");
-    g_signal_connect(button, "clicked", G_CALLBACK(onClicked), NULL);
-    gtk_container_add(GTK_CONTAINER(button_box), button);
-    gtk_box_pack_start(GTK_BOX(containerBox), button_box, FALSE, FALSE, 5);
-
-    // ==== TẠO NOTEBOOK (CÁC TAB) ====
+   
+       // ==== TẠO NOTEBOOK (CÁC TAB) ====
     GtkWidget *notebook = gtk_notebook_new();
 
     // === TAB 1: Trang chủ ===
@@ -63,41 +56,63 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tab_content2, tab_label2);
 
     // === TAB 3: Bãi xe ===
-    GtkWidget *tab_label3 = gtk_label_new("Bãi xe");
-    
-    // Tạo model cho danh sách xe (1 cột là biển số)
-    GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
-    GtkTreeIter iter;
+GtkWidget *tab_label3 = gtk_label_new("Bãi xe");
 
-    // Thêm một số dòng mẫu
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "59A1-123.45", -1);
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "60B2-456.78", -1);
+// Tạo notebook con để chứa các tầng
+GtkWidget *nested_notebook = gtk_notebook_new();
 
-    // Tạo TreeView
-    GtkWidget *treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+// === Tầng 1 ===
+GtkWidget *tab_tang1 = gtk_label_new("Tầng 1");
 
-    // Tạo renderer để hiển thị text
-    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("Biển số xe", renderer, "text", 0, NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+// Model và TreeView cho tầng 1
+GtkListStore *store_tang1 = gtk_list_store_new(1, G_TYPE_STRING);
+GtkTreeIter iter1;
+gtk_list_store_append(store_tang1, &iter1);
+gtk_list_store_set(store_tang1, &iter1, 0, "59A1-123.45", -1);
 
-    // Đặt treeview trong scrolled window để cuộn nếu quá nhiều dòng
-    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-    gtk_container_add(GTK_CONTAINER(scrolled_window), treeview);
+GtkWidget *treeview_tang1 = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store_tang1));
+GtkCellRenderer *renderer1 = gtk_cell_renderer_text_new();
+GtkTreeViewColumn *column1 = gtk_tree_view_column_new_with_attributes("Biển số xe", renderer1, "text", 0, NULL);
+gtk_tree_view_append_column(GTK_TREE_VIEW(treeview_tang1), column1);
 
-    gtk_widget_set_vexpand(scrolled_window, TRUE);  // Cho phép giãn chiều cao
-    gtk_widget_set_hexpand(scrolled_window, TRUE);  // Cho phép giãn chiều rộng
+GtkWidget *scroll_tang1 = gtk_scrolled_window_new(NULL, NULL);
+gtk_container_add(GTK_CONTAINER(scroll_tang1), treeview_tang1);
+gtk_widget_set_vexpand(scroll_tang1, TRUE);
+gtk_widget_set_hexpand(scroll_tang1, TRUE);
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled_window, tab_label3);
+gtk_notebook_append_page(GTK_NOTEBOOK(nested_notebook), scroll_tang1, tab_tang1);
 
-    // Thêm notebook vào container chính
-    gtk_box_pack_start(GTK_BOX(containerBox), notebook, TRUE, TRUE, 5);
+// === Tầng 2 ===
+GtkWidget *tab_tang2 = gtk_label_new("Tầng 2");
 
-    // ==== THÊM VÀO CỬA SỔ & HIỂN THỊ ====
-    gtk_container_add(GTK_CONTAINER(window), containerBox);
-    gtk_widget_show_all(window);
+// Model và TreeView cho tầng 2
+GtkListStore *store_tang2 = gtk_list_store_new(1, G_TYPE_STRING);
+GtkTreeIter iter2;
+gtk_list_store_append(store_tang2, &iter2);
+gtk_list_store_set(store_tang2, &iter2, 0, "60B2-456.78", -1);
+
+GtkWidget *treeview_tang2 = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store_tang2));
+GtkCellRenderer *renderer2 = gtk_cell_renderer_text_new();
+GtkTreeViewColumn *column2 = gtk_tree_view_column_new_with_attributes("Biển số xe", renderer2, "text", 0, NULL);
+gtk_tree_view_append_column(GTK_TREE_VIEW(treeview_tang2), column2);
+
+GtkWidget *scroll_tang2 = gtk_scrolled_window_new(NULL, NULL);
+gtk_container_add(GTK_CONTAINER(scroll_tang2), treeview_tang2);
+gtk_widget_set_vexpand(scroll_tang2, TRUE);
+gtk_widget_set_hexpand(scroll_tang2, TRUE);
+
+gtk_notebook_append_page(GTK_NOTEBOOK(nested_notebook), scroll_tang2, tab_tang2);
+
+// Cuối cùng: Thêm notebook con vào tab chính "Bãi xe"
+gtk_notebook_append_page(GTK_NOTEBOOK(notebook), nested_notebook, tab_label3);
+
+// Thêm notebook vào container chính
+gtk_box_pack_start(GTK_BOX(containerBox), notebook, TRUE, TRUE, 5);
+
+// Thêm vào cửa sổ & hiển thị
+gtk_container_add(GTK_CONTAINER(window), containerBox);
+gtk_widget_show_all(window);
+
 }
 
 // Hàm xử lý nhập biển số
