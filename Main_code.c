@@ -3,6 +3,16 @@
 #include <string.h>
 #include <time.h>
 
+typedef struct {
+    char license_plate[20];   // biển số xe
+    int fee;                  // số tiền
+    time_t entry_time;        // thời gian vào
+} vehicle;
+
+#define MAX_SLOTS 100
+vehicle vehicle_list[MAX_SLOTS];
+int num_vehicles = 0;
+
 // Đọc dữ liệu từ file
 void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
