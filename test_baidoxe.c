@@ -41,6 +41,30 @@ void save_to_file(vehicle*new_vehicle){
     fprintf(pt, "%s %d %ld\n", new_vehicle->license_plate, new_vehicle->fee, new_vehicle->entry_time);
     fclose(pt);
 }
+//hàm kiểm tra biển số
+void Check_license_plate(char *a) {
+    while (1) {
+        int count = 0;
+
+        // Kiểm tra cú pháp biển số
+        if (strlen(a) == 10) { // Kiểm tra độ dài
+            if (isdigit(a[0]) && isdigit(a[1])) count++;  // 2 chữ số đầu
+            if (isalpha(a[2])) count++;  // 1 chữ cái
+            if (a[3] == '-') count++;  // dấu '-'
+            if (isdigit(a[4]) && isdigit(a[5]) && isdigit(a[6])) count++;  // 3 chữ số sau dấu '-'
+            if (a[7] == '.') count++;  // dấu '.'
+            if (isdigit(a[8]) && isdigit(a[9])) count++;  // 2 chữ số sau dấu '.'
+        }
+
+        // Nếu tất cả các điều kiện đúng
+        if (count == 6) {
+            return;  // Biển số hợp lệ
+        } else {
+            printf("Invalid license plate format! Please enter again (format: XXA-XXX.XX): ");
+            scanf("%s", a);  // Yêu cầu nhập lại biển số
+        }
+    }
+}
 // Thêm xe mới
 void add_vehicle() {
     if (!has_available_slot()) {
@@ -49,9 +73,17 @@ void add_vehicle() {
     }
 
     vehicle new_vehicle;
+    printf("Note: License plate format should be 2 digits + 1 letter + '-' + 3 digits + '.' + 2 digits.\n");
     printf("Enter license plate: ");
     scanf("%s", new_vehicle.license_plate);
-
+	Check_license_plate(new_vehicle.license_plate);
+	//check xem biển có tồn tại chưa
+    for (int i=0;i<num_vehicles;i++){
+    		if (strcmp(new_vehicle.license_plate,vehicle_list[i].license_plate)==0){
+    			printf("This license plate already exists!\n");
+    			return;
+			}
+	}
     new_vehicle.entry_time = time(NULL);
     new_vehicle.fee = 0;
     vehicle_list[num_vehicles++] = new_vehicle;
