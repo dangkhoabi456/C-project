@@ -44,7 +44,13 @@ void save_to_file(vehicle* new_vehicle){
         return;
     }
 
-    fprintf(pt, "%s %d %ld\n", new_vehicle->license_plate, new_vehicle->fee, new_vehicle->entry_time);
+    // Chuyển entry_time sang chuỗi ngày giờ
+    char time_str[26];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&new_vehicle->entry_time));
+
+    // Ghi biển số, phí, và thời gian vào (dạng dễ đọc)
+    fprintf(pt, "%s %d %s\n", new_vehicle->license_plate, new_vehicle->fee, time_str);
+
     fclose(pt);
 }
 
