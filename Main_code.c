@@ -74,7 +74,8 @@ void save_to_file(vehicle* new_vehicle){
     strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&new_vehicle->entry_time));
 
     // Ghi biển số, phí, và thời gian vào (dạng dễ đọc)
-    fprintf(pt, "%s %d %s\n", new_vehicle->license_plate, new_vehicle->fee, time_str);
+    fprintf(pt, "%s %d %s %d\n", new_vehicle.license_plate, new_vehicle.fee, time_str, new_vehicle.floor);
+
 
     fclose(pt);
 }
@@ -115,6 +116,10 @@ void add_vehicle() {
     fgets(new_vehicle.license_plate, sizeof(new_vehicle.license_plate), stdin);
     new_vehicle.license_plate[strcspn(new_vehicle.license_plate, "\n")] = '\0'; // xóa kí tự '\n'
     Check_license_plate(new_vehicle.license_plate);
+    printf("Enter floor number (1/2): ");
+    scanf("%d", &new_vehicle.floor);
+    getchar(); // clear buffer
+
 
     for (int i = 0; i < num_vehicles; i++){
         if (strcmp(new_vehicle.license_plate, vehicle_list[i].license_plate) == 0){
