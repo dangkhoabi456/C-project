@@ -147,14 +147,18 @@ void display_vehicle_list() {
         return;
     }
 
-    printf("%-5s %-20s %-25s %-25s\n", "No.", "License Plate", "Entry Time","Fee");
+    printf("%-5s %-20s %-25s %-10s %-6s\n", "No.", "License Plate", "Entry Time", "Fee", "Floor");
     for (int i = 0; i < num_vehicles; i++) {
         char time_str[26];
         strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&vehicle_list[i].entry_time));
-        printf("%-5d %-20s %-25s %-25d\n", i + 1, vehicle_list[i].license_plate, time_str, vehicle_list[i].fee);
+        printf("%-5d %-20s %-25s %-10d %-6d\n", 
+               i + 1, 
+               vehicle_list[i].license_plate, 
+               time_str, 
+               vehicle_list[i].fee, 
+               vehicle_list[i].floor);
     }
 }
-
 vehicle* find_vehicle(const char *license_plate) {
     for (int i = 0; i < num_vehicles; i++) {
         if (strcmp(vehicle_list[i].license_plate, license_plate) == 0) {
