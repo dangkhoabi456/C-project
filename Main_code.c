@@ -31,7 +31,7 @@ void read_from_file() {
     while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4) {
         struct tm tm_time;
         // Thay thế strptime bằng sscanf
-        if (sscanf(time_str, "%4d-%2d-%2d %2d:%2d:%2d", 
+        if (scanf(time_str, "%4d-%2d-%2d %2d:%2d:%2d", 
                     &tm_time.tm_year, &tm_time.tm_mon, &tm_time.tm_mday,
                     &tm_time.tm_hour, &tm_time.tm_min, &tm_time.tm_sec) == 6) {
             tm_time.tm_year -= 1900; // Chỉnh sửa năm (do tm_year tính từ 1900)
