@@ -26,7 +26,7 @@ void read_from_file() {
     vehicle temp;
     char time_str[26]; // để đọc chuỗi thời gian
 
-    while (fscanf(pt, "%s %d %25[^\\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4)
+    while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4)
  {
         struct tm tm_time;
         if (strptime(time_str, "%Y-%m-%d %H:%M:%S", &tm_time) != NULL) {
