@@ -17,7 +17,7 @@ typedef struct {
 #define MAX_SLOTS 100
 vehicle vehicle_list[MAX_SLOTS];
 int num_vehicles = 0;
-
+double total=0; // biến toàn cục
 // Đọc dữ liệu từ file
 void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
