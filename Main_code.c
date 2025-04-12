@@ -244,8 +244,8 @@ void vehicle_sum() {
     }
 
     fclose(pt);
-    printf("Tổng số xe vào: %d\n", vehicle_sum_in);
-    printf("Tổng số xe ra : %d\n", vehicle_sum_out);
+    printf("Tong so xe vao: %d\n", vehicle_sum_in);
+    printf("Tong so xe ra : %d\n", vehicle_sum_out);
 }
 
 void Cal_total(double fee){
