@@ -18,6 +18,8 @@ typedef struct {
 vehicle vehicle_list[MAX_SLOTS];
 int num_vehicles = 0;
 double total=0; // biến toàn cục
+void Cal_total(double fee);  // Khai báo hàm Cal_total
+
 // Đọc dữ liệu từ file
 void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
@@ -26,10 +28,14 @@ void read_from_file() {
     vehicle temp;
     char time_str[26]; // để đọc chuỗi thời gian
 
-    while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4)
- {
+    while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4) {
         struct tm tm_time;
-        if (strptime(time_str, "%Y-%m-%d %H:%M:%S", &tm_time) != NULL) {
+        // Thay thế strptime bằng sscanf
+        if (sscanf(time_str, "%4d-%2d-%2d %2d:%2d:%2d", 
+                    &tm_time.tm_year, &tm_time.tm_mon, &tm_time.tm_mday,
+                    &tm_time.tm_hour, &tm_time.tm_min, &tm_time.tm_sec) == 6) {
+            tm_time.tm_year -= 1900; // Chỉnh sửa năm (do tm_year tính từ 1900)
+            tm_time.tm_mon -= 1;     // Chỉnh sửa tháng (do tm_mon bắt đầu từ 0)
             temp.entry_time = mktime(&tm_time);
             temp.clock_start = 0; // reset clock_start
             if (num_vehicles < MAX_SLOTS) {
@@ -39,6 +45,7 @@ void read_from_file() {
     }
     fclose(pt);
 }
+
 
 void log_action(const char *license_plate, const char *action) {
     FILE *log = fopen("log.txt", "a");
@@ -75,7 +82,9 @@ void save_to_file(vehicle* new_vehicle){
     strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&new_vehicle->entry_time));
 
     // Ghi biển số, phí, và thời gian vào (dạng dễ đọc)
-    fprintf(pt, "%s %d %s %d\n", new_vehicle.license_plate, new_vehicle.fee, time_str, new_vehicle.floor);
+// Ghi biển số, phí, và thời gian vào (dạng dễ đọc)
+	fprintf(pt, "%s %d %s %d\n", new_vehicle->license_plate, new_vehicle->fee, time_str, new_vehicle->floor);
+
 
 
     fclose(pt);
