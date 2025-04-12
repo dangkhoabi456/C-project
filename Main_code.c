@@ -10,7 +10,8 @@ typedef struct {
     char license_plate[20];   // biển số xe
     int fee;                  // số tiền
     time_t entry_time;        // thời gian vào
-    clock_t clock_start;      // thời gian bắt đầu tính giờ riêng
+    clock_t clock_start;// thời gian bắt đầu tính giờ riêng
+    int floor; 
 } vehicle;
 
 #define MAX_SLOTS 100
