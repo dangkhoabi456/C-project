@@ -150,6 +150,7 @@ void remove_vehicle(const char *license_plate) {
 
     printf("Elapsed time for vehicle %s: %02d:%02d:%02d (hh:mm:ss)\n", license_plate, hours, minutes, seconds);
     printf("Total fee: %d VND\n", veh->fee);
+    Cal_total(veh->fee);
 
     for (int i = 0; i < num_vehicles; i++) {
         if (strcmp(vehicle_list[i].license_plate, license_plate) == 0) {
@@ -175,7 +176,33 @@ void start_stopwatch() {
     int seconds = (int)elapsed_seconds % 60;
     printf("Elapsed time: %02d:%02d:%02d (hh:mm:ss)\n", hours, minutes, seconds);
 }
+void vehicle_sum(){
+	FILE *pt = fopen("parking_data.txt", "r");
+    if (pt == NULL) {
+        printf("Cannot open file!\n");
+        return;
+    }
+	int vehicle_sum_in = 0;
+	int vehicle_sum_out = 0;
+	char line[256];
+while (fgets(line, sizeof(line), pt)) {
+    if (strstr(line, "in") != NULL) {
+        vehicle_sum_in++;
+    } else if (strstr(line, "out") != NULL) {
+        vehicle_sum_out++;
+    }
+}
 
+	fclose(pt);
+	printf("Tổng số xe vào: %d\n",vehicle_sum_in);
+	printf("Tổng số xe ra : %d\n",vehicle_sum_out);
+}
+void Cal_total(double fee){
+	total += fee;
+}//gọi hàm Cal_total(fee) ở trong hàm void remove_vehicle(const char *license_plate)
+void show_total() {
+    printf("\nTong tien da thu tu cac xe roi bai: %.2f VND\n", total);
+}
 int main() {
     read_from_file();
     int choice;
@@ -187,7 +214,9 @@ int main() {
         printf("2. Xe roi bai\n");
         printf("3. Xem danh sach xe\n");
         printf("4. Dong ho dem gio doc lap\n");
-        printf("5. Thoat\n");
+        printf("5. Tong doanh thu\n");
+        printf("6. Tong so xe ra/vao\n");
+        printf("7. Thoat\n");
         printf("Chon chuc nang: ");
         scanf("%d", &choice);
         getchar(); // Clear buffer sau scanf
@@ -208,6 +237,12 @@ int main() {
                 start_stopwatch();
                 break;
             case 5:
+                show_total();
+                break;
+            case 6:
+                vehicle_sum();
+                break;
+            case 7:
                 return 0;
             default:
                 printf("Lua chon khong hop le!\n");
