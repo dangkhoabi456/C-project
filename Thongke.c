@@ -2,7 +2,25 @@
 #include <stdlib.h>
 #include <math.h>
 double total=0; // biến toàn cục
-char vehicle_list[100];
+
+
+void log_action(const char *license_plate, const char *action) {
+    FILE *log = fopen("log.txt", "a");
+    if (!log) {
+        printf("Không thể mở log.txt để ghi!\n");
+        return;
+    }
+
+    time_t now = time(NULL);
+    struct tm *time_info = localtime(&now);
+
+    char time_str[30];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", time_info);
+
+    fprintf(log, "%s %s %s\n", license_plate, action, time_str);
+    fclose(log);
+}
+
 void vehicle_sum() {
     FILE *pt = fopen("log.txt", "r");
     if (pt == NULL) {
