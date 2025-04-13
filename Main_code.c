@@ -47,22 +47,6 @@ void read_from_file() {
 }
 
 
-void log_action(const char *license_plate, const char *action) {
-    FILE *log = fopen("log.txt", "a");
-    if (!log) {
-        printf("Không thể mở log.txt để ghi!\n");
-        return;
-    }
-
-    time_t now = time(NULL);
-    struct tm *time_info = localtime(&now);
-
-    char time_str[30];
-    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", time_info);
-
-    fprintf(log, "%s %s %s\n", license_plate, action, time_str);
-    fclose(log);
-}
 
 
 // Kiểm tra còn chỗ không
@@ -222,6 +206,22 @@ void start_stopwatch() {
     int minutes = ((int)(elapsed_seconds) % 3600) / 60;
     int seconds = (int)elapsed_seconds % 60;
     printf("Elapsed time: %02d:%02d:%02d (hh:mm:ss)\n", hours, minutes, seconds);
+}
+void log_action(const char *license_plate, const char *action) {
+    FILE *log = fopen("log.txt", "a");
+    if (!log) {
+        printf("Không thể mở log.txt để ghi!\n");
+        return;
+    }
+
+    time_t now = time(NULL);
+    struct tm *time_info = localtime(&now);
+
+    char time_str[30];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", time_info);
+
+    fprintf(log, "%s %s %s\n", license_plate, action, time_str);
+    fclose(log);
 }
 void vehicle_sum() {
     FILE *pt = fopen("log.txt", "r");
