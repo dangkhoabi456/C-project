@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 double total=0; // biến toàn cục
-
+void Cal_total(double fee);  // Khai báo hàm Cal_total
 
 void log_action(const char *license_plate, const char *action) {
     FILE *log = fopen("log.txt", "a");
