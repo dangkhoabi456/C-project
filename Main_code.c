@@ -10,34 +10,31 @@ typedef struct {
     char license_plate[20];   // biển số xe
     int fee;                  // số tiền
     time_t entry_time;        // thời gian vào
-    clock_t clock_start;// thời gian bắt đầu tính giờ riêng
     int floor; 
 } vehicle;
 
 #define MAX_SLOTS 100
 vehicle vehicle_list[MAX_SLOTS];
 int num_vehicles = 0;
-double total=0; // biến toàn cục
-void Cal_total(double fee);  // Khai báo hàm Cal_total
+double total = 0;
 
-// Đọc dữ liệu từ file
+void Cal_total(double fee);  // Khai báo hàm
+
 void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
     if (pt == NULL) return;
 
     vehicle temp;
-    char time_str[26]; // để đọc chuỗi thời gian
+    char time_str[26];
 
     while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4) {
         struct tm tm_time;
-        // Thay thế strptime bằng sscanf
         if (sscanf(time_str, "%4d-%2d-%2d %2d:%2d:%2d", 
-                    &tm_time.tm_year, &tm_time.tm_mon, &tm_time.tm_mday,
-                    &tm_time.tm_hour, &tm_time.tm_min, &tm_time.tm_sec) == 6) {
-            tm_time.tm_year -= 1900; // Chỉnh sửa năm (do tm_year tính từ 1900)
-            tm_time.tm_mon -= 1;     // Chỉnh sửa tháng (do tm_mon bắt đầu từ 0)
+                   &tm_time.tm_year, &tm_time.tm_mon, &tm_time.tm_mday,
+                   &tm_time.tm_hour, &tm_time.tm_min, &tm_time.tm_sec) == 6) {
+            tm_time.tm_year -= 1900;
+            tm_time.tm_mon -= 1;
             temp.entry_time = mktime(&tm_time);
-            temp.clock_start = 0; // reset clock_start
             if (num_vehicles < MAX_SLOTS) {
                 vehicle_list[num_vehicles++] = temp;
             }
@@ -46,40 +43,26 @@ void read_from_file() {
     fclose(pt);
 }
 
-
-
-
-// Kiểm tra còn chỗ không
 int has_available_slot() {
     return num_vehicles < MAX_SLOTS;
 }
 
-void save_to_file(vehicle* new_vehicle){
+void save_to_file(vehicle* new_vehicle) {
     FILE *pt = fopen("parking_data.txt", "a");
     if (pt == NULL) {
         printf("Unable to open file to write!\n");
         return;
     }
 
-    // Chuyển entry_time sang chuỗi ngày giờ
     char time_str[26];
     strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&new_vehicle->entry_time));
-
-    // Ghi biển số, phí, và thời gian vào (dạng dễ đọc)
-// Ghi biển số, phí, và thời gian vào (dạng dễ đọc)
-	fprintf(pt, "%s %d %s %d\n", new_vehicle->license_plate, new_vehicle->fee, time_str, new_vehicle->floor);
-
-
-
+    fprintf(pt, "%s %d %s %d\n", new_vehicle->license_plate, new_vehicle->fee, time_str, new_vehicle->floor);
     fclose(pt);
 }
 
-//hàm kiểm tra biển số
 void Check_license_plate(char *a) {
     while (1) {
         int count = 0;
-
-        // Kiểm tra cú pháp biển số
         if (strlen(a) == 10) {
             if (isdigit(a[0]) && isdigit(a[1])) count++;
             if (isalpha(a[2])) count++;
@@ -98,6 +81,21 @@ void Check_license_plate(char *a) {
     }
 }
 
+void log_action(const char *license_plate, const char *action) {
+    FILE *log = fopen("log.txt", "a");
+    if (!log) {
+        printf("Không thể mở log.txt để ghi!\n");
+        return;
+    }
+
+    time_t now = time(NULL);
+    struct tm *time_info = localtime(&now);
+    char time_str[30];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", time_info);
+    fprintf(log, "%s %s %s\n", license_plate, action, time_str);
+    fclose(log);
+}
+
 void add_vehicle() {
     if (!has_available_slot()) {
         printf("The parking lot is full!\n");
@@ -108,30 +106,27 @@ void add_vehicle() {
     printf("Note: License plate format should be 2 digits + 1 letter + '-' + 3 digits + '.' + 2 digits.\n");
     printf("Enter license plate: ");
     fgets(new_vehicle.license_plate, sizeof(new_vehicle.license_plate), stdin);
-    new_vehicle.license_plate[strcspn(new_vehicle.license_plate, "\n")] = '\0'; // xóa kí tự '\n'
+    new_vehicle.license_plate[strcspn(new_vehicle.license_plate, "\n")] = '\0';
     Check_license_plate(new_vehicle.license_plate);
+
     printf("Enter floor number (1/2): ");
     scanf("%d", &new_vehicle.floor);
-    getchar(); // clear buffer
+    getchar();
 
-
-    for (int i = 0; i < num_vehicles; i++){
-        if (strcmp(new_vehicle.license_plate, vehicle_list[i].license_plate) == 0){
+    for (int i = 0; i < num_vehicles; i++) {
+        if (strcmp(new_vehicle.license_plate, vehicle_list[i].license_plate) == 0) {
             printf("This license plate already exists!\n");
             return;
         }
     }
 
     new_vehicle.entry_time = time(NULL);
-    new_vehicle.clock_start = clock(); // bắt đầu tính giờ riêng cho xe
     new_vehicle.fee = 0;
     vehicle_list[num_vehicles++] = new_vehicle;
     save_to_file(&new_vehicle);
 
-    printf("Stopwatch started for this vehicle.\n");
     printf("Vehicle added successfully!\n");
     log_action(new_vehicle.license_plate, "in");
-	
 }
 
 void display_vehicle_list() {
@@ -152,6 +147,7 @@ void display_vehicle_list() {
                vehicle_list[i].floor);
     }
 }
+
 vehicle* find_vehicle(const char *license_plate) {
     for (int i = 0; i < num_vehicles; i++) {
         if (strcmp(vehicle_list[i].license_plate, license_plate) == 0) {
@@ -168,14 +164,13 @@ void remove_vehicle(const char *license_plate) {
         return;
     }
 
-    // Dừng tính giờ và tính thời gian đỗ xe
-    clock_t clock_end = clock();
-    double elapsed_seconds = (double)(clock_end - veh->clock_start) / CLOCKS_PER_SEC;
+    time_t current_time = time(NULL);
+    double elapsed_seconds = difftime(current_time, veh->entry_time);
     int hours = (int)(elapsed_seconds / 3600);
     int minutes = ((int)(elapsed_seconds) % 3600) / 60;
     int seconds = (int)elapsed_seconds % 60;
 
-    int total_hours = (elapsed_seconds + 3599) / 3600; // Làm tròn lên nếu còn dư phút
+    int total_hours = (elapsed_seconds + 3599) / 3600;
     veh->fee = total_hours * HOURLY_RATE;
 
     printf("Elapsed time for vehicle %s: %02d:%02d:%02d (hh:mm:ss)\n", license_plate, hours, minutes, seconds);
@@ -194,35 +189,14 @@ void remove_vehicle(const char *license_plate) {
     printf("Vehicle removed.\n");
 }
 
-void start_stopwatch() {
-    printf("Press ENTER to start the stopwatch...\n");
-    getchar();
-    clock_t start = clock();
-    printf("Stopwatch started! Press ENTER to stop...\n");
-    getchar();
-    clock_t end = clock();
-    double elapsed_seconds = (double)(end - start) / CLOCKS_PER_SEC;
-    int hours = (int)(elapsed_seconds / 3600);
-    int minutes = ((int)(elapsed_seconds) % 3600) / 60;
-    int seconds = (int)elapsed_seconds % 60;
-    printf("Elapsed time: %02d:%02d:%02d (hh:mm:ss)\n", hours, minutes, seconds);
+void Cal_total(double fee) {
+    total += fee;
 }
-void log_action(const char *license_plate, const char *action) {
-    FILE *log = fopen("log.txt", "a");
-    if (!log) {
-        printf("Không thể mở log.txt để ghi!\n");
-        return;
-    }
 
-    time_t now = time(NULL);
-    struct tm *time_info = localtime(&now);
-
-    char time_str[30];
-    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", time_info);
-
-    fprintf(log, "%s %s %s\n", license_plate, action, time_str);
-    fclose(log);
+void show_total() {
+    printf("\nTong tien da thu tu cac xe roi bai: %.2f VND\n", total);
 }
+
 void vehicle_sum() {
     FILE *pt = fopen("log.txt", "r");
     if (pt == NULL) {
@@ -248,12 +222,6 @@ void vehicle_sum() {
     printf("Tong so xe ra : %d\n", vehicle_sum_out);
 }
 
-void Cal_total(double fee){
-	total += fee;
-}//gọi hàm Cal_total(fee) ở trong hàm void remove_vehicle(const char *license_plate)
-void show_total() {
-    printf("\nTong tien da thu tu cac xe roi bai: %.2f VND\n", total);
-}
 int main() {
     read_from_file();
     int choice;
@@ -264,13 +232,12 @@ int main() {
         printf("1. Them xe vao bai\n");
         printf("2. Xe roi bai\n");
         printf("3. Xem danh sach xe\n");
-        printf("4. Dong ho dem gio doc lap\n");
-        printf("5. Tong doanh thu\n");
-        printf("6. Tong so xe ra/vao\n");
-        printf("7. Thoat\n");
+        printf("4. Tong doanh thu\n");
+        printf("5. Tong so xe ra/vao\n");
+        printf("6. Thoat\n");
         printf("Chon chuc nang: ");
         scanf("%d", &choice);
-        getchar(); // Clear buffer sau scanf
+        getchar();
 
         switch (choice) {
             case 1:
@@ -285,15 +252,12 @@ int main() {
                 display_vehicle_list();
                 break;
             case 4:
-                start_stopwatch();
-                break;
-            case 5:
                 show_total();
                 break;
-            case 6:
+            case 5:
                 vehicle_sum();
                 break;
-            case 7:
+            case 6:
                 return 0;
             default:
                 printf("Lua chon khong hop le!\n");
