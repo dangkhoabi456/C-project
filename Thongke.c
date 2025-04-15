@@ -5,6 +5,21 @@ double total=0; // biến toàn cục
 void Cal_total(double fee);  // Khai báo hàm Cal_total
 void save_doanh_thu();
 void load_doanh_thu();
+void save_doanh_thu() {
+    FILE *f = fopen("doanh_thu.txt", "w");
+    if (f) {
+        fprintf(f, "%.0f", doanh_thu);
+        fclose(f);
+    }
+}
+
+void load_doanh_thu() {
+    FILE *f = fopen("doanh_thu.txt", "r");
+    if (f) {
+        fscanf(f, "%lf", &doanh_thu);
+        fclose(f);
+    }
+}
 void log_action(const char *license_plate, const char *action) {
     FILE *log = fopen("log.txt", "a");
     if (!log) {
