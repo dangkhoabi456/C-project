@@ -31,7 +31,7 @@ int has_available_slot();
 static void ThanhtoanvaXoa(GtkWidget *widget, gpointer data);
 static void onNhapBienSoXe(GtkWidget *widget, gpointer data); // prototype
 int Check__license_plate(const char *a);  // Khai báo prototype
-void read_from_file();
+void read_form_file(SharedData *shared_data);
 vehicle* find_vehicle(const char *license_plate);
 void update_statistics_display();
 static void on_search_changed(GtkEditable *entry, gpointer user_data);
@@ -57,39 +57,40 @@ void load_doanh_thu() {
 }
 
 // Thay đổi hàm read_from_file() để tương thích Windows
-void read_from_file() {
+void read_parking_data() {
     FILE *pt = fopen("parking_data.txt", "r");
     if (pt == NULL) {
-        pt = fopen("parking_data.txt", "w"); // Tạo file nếu chưa tồn tại
+        pt = fopen("parking_data.txt", "w"); // Tạo file nếu chưa có
         if (pt) fclose(pt);
         return;
     }
 
     vehicle temp;
-    char time_str[26];
+    int year, mon, day, hour, min, sec;
     num_vehicles = 0;
 
-    while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4) {
-        struct tm tm_time = {0}; // Khởi tạo struct tm về 0
-        
-        // Phân tích chuỗi thời gian
-        if (sscanf(time_str, "%4d-%2d-%2d %2d:%2d:%2d", 
-                  &tm_time.tm_year, &tm_time.tm_mon, &tm_time.tm_mday,
-                  &tm_time.tm_hour, &tm_time.tm_min, &tm_time.tm_sec) == 6) {
-            tm_time.tm_year -= 1900;
-            tm_time.tm_mon -= 1;
-            temp.entry_time = mktime(&tm_time);
-            
-            // Tính toán lại clock_start để tiếp tục đếm giờ
-            temp.clock_start = clock() - (clock_t)(difftime(time(NULL), temp.entry_time) * CLOCKS_PER_SEC);
-            
-            if (num_vehicles < MAX_SLOTS) {
-                vehicle_list[num_vehicles++] = temp;
-            }
+    while (fscanf(pt, "%s %d %d-%d-%d %d:%d:%d %d",
+                  temp.license_plate, &temp.fee,
+                  &year, &mon, &day, &hour, &min, &sec, &temp.floor) == 9) {
+        struct tm tm_time = {0};
+        tm_time.tm_year = year - 1900;
+        tm_time.tm_mon = mon - 1;
+        tm_time.tm_mday = day;
+        tm_time.tm_hour = hour;
+        tm_time.tm_min = min;
+        tm_time.tm_sec = sec;
+
+        temp.entry_time = mktime(&tm_time);
+        temp.clock_start = clock() - (clock_t)(difftime(time(NULL), temp.entry_time) * CLOCKS_PER_SEC);
+
+        if (num_vehicles < MAX_SLOTS) {
+            vehicle_list[num_vehicles++] = temp;
         }
     }
     fclose(pt);
 }
+
+
 void log_action(const char *license_plate, const char *action, int fee) {
     FILE *log = fopen("log.txt", "a");
     if (!log) return;
@@ -251,8 +252,9 @@ g_signal_connect(search_entry, "changed", G_CALLBACK(on_search_changed), shared_
 g_signal_connect(btn2, "clicked", G_CALLBACK(ThanhtoanvaXoa), shared_data);
 
  load_doanh_thu();
-read_from_file();
+read_parking_data();
 load_treeviews(shared_data);
+
 // Kết nối nút với callback và truyền shared_data
 g_signal_connect(btn1, "clicked", G_CALLBACK(onNhapBienSoXe), shared_data);
     
@@ -482,6 +484,8 @@ static void ThanhtoanvaXoa(GtkWidget *widget, gpointer data) {
 }
 void update_statistics_display() {
     int in_count = 0, out_count = 0;
+    // Luôn đọc lại doanh thu từ file
+    load_doanh_thu();
 
     FILE *log = fopen("log.txt", "r");
     if (log) {
