@@ -7,18 +7,22 @@
 #define HOURLY_RATE 5000  // đơn giá gửi xe mỗi giờ
 
 typedef struct {
-    char license_plate[20];   // biển số xe
-    int fee;                  // số tiền
-    time_t entry_time;        // thời gian vào
+    char license_plate[20];
+    int fee;
+    time_t entry_time;
     int floor; 
 } vehicle;
 
 #define MAX_SLOTS 100
 vehicle vehicle_list[MAX_SLOTS];
 int num_vehicles = 0;
-double total = 0;
+double doanh_thu = 0;  // Thay vì dùng total
 
-void Cal_total(double fee);  // Khai báo hàm
+void Cal_total(double fee);
+void save_doanh_thu();
+void load_doanh_thu();
+
+
 
 void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
@@ -188,13 +192,28 @@ void remove_vehicle(const char *license_plate) {
     }
     printf("Vehicle removed.\n");
 }
+void save_doanh_thu() {
+    FILE *f = fopen("doanh_thu.txt", "w");
+    if (f) {
+        fprintf(f, "%.0f", doanh_thu);
+        fclose(f);
+    }
+}
 
+void load_doanh_thu() {
+    FILE *f = fopen("doanh_thu.txt", "r");
+    if (f) {
+        fscanf(f, "%lf", &doanh_thu);
+        fclose(f);
+    }
+}
 void Cal_total(double fee) {
-    total += fee;
+    doanh_thu += fee;
+    save_doanh_thu();
 }
 
 void show_total() {
-    printf("\nTong tien da thu tu cac xe roi bai: %.2f VND\n", total);
+    printf("\nTong tien da thu tu cac xe roi bai: %.0f VND\n", doanh_thu);
 }
 
 void vehicle_sum() {
@@ -223,6 +242,7 @@ void vehicle_sum() {
 }
 
 int main() {
+    load_doanh_thu(); // mới thêm
     read_from_file();
     int choice;
     char license_plate[20];
