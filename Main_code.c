@@ -26,22 +26,32 @@ void load_doanh_thu();
 
 void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
-    if (pt == NULL) return;
+    if (pt == NULL) {
+        pt = fopen("parking_data.txt", "w"); // Tạo file nếu chưa có
+        if (pt) fclose(pt);
+        return;
+    }
 
     vehicle temp;
-    char time_str[26];
+    int year, mon, day, hour, min, sec;
+    num_vehicles = 0;
 
-    while (fscanf(pt, "%s %d %25[^\n] %d", temp.license_plate, &temp.fee, time_str, &temp.floor) == 4) {
-        struct tm tm_time;
-        if (sscanf(time_str, "%4d-%2d-%2d %2d:%2d:%2d", 
-                   &tm_time.tm_year, &tm_time.tm_mon, &tm_time.tm_mday,
-                   &tm_time.tm_hour, &tm_time.tm_min, &tm_time.tm_sec) == 6) {
-            tm_time.tm_year -= 1900;
-            tm_time.tm_mon -= 1;
-            temp.entry_time = mktime(&tm_time);
-            if (num_vehicles < MAX_SLOTS) {
-                vehicle_list[num_vehicles++] = temp;
-            }
+    while (fscanf(pt, "%s %d %d-%d-%d %d:%d:%d %d",
+                  temp.license_plate, &temp.fee,
+                  &year, &mon, &day, &hour, &min, &sec, &temp.floor) == 9) {
+        struct tm tm_time = {0};
+        tm_time.tm_year = year - 1900;
+        tm_time.tm_mon = mon - 1;
+        tm_time.tm_mday = day;
+        tm_time.tm_hour = hour;
+        tm_time.tm_min = min;
+        tm_time.tm_sec = sec;
+
+        temp.entry_time = mktime(&tm_time);
+        temp.clock_start = clock() - (clock_t)(difftime(time(NULL), temp.entry_time) * CLOCKS_PER_SEC);
+
+        if (num_vehicles < MAX_SLOTS) {
+            vehicle_list[num_vehicles++] = temp;
         }
     }
     fclose(pt);
