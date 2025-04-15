@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-double total=0; // biến toàn cục
+double doanh_thu=0; // biến toàn cục
 void Cal_total(double fee);  // Khai báo hàm Cal_total
 void save_doanh_thu();
 void load_doanh_thu();
@@ -63,10 +63,10 @@ void vehicle_sum() {
 }
 
 void Cal_total(double fee){
-	total += fee;
+	doanh_thu += fee;
 }//gọi hàm Cal_total(fee) ở trong hàm void remove_vehicle(const char *license_plate)
 void show_total() {
-    printf("\nTong tien da thu tu cac xe roi bai: %.2f VND\n", total);
+    printf("\nTong tien da thu tu cac xe roi bai: %.2f VND\n", doanh_thu);
 }
 int main(){
 	double fee;
