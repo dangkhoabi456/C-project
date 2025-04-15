@@ -3,7 +3,8 @@
 #include <math.h>
 double total=0; // biến toàn cục
 void Cal_total(double fee);  // Khai báo hàm Cal_total
-
+void save_doanh_thu();
+void load_doanh_thu();
 void log_action(const char *license_plate, const char *action) {
     FILE *log = fopen("log.txt", "a");
     if (!log) {
