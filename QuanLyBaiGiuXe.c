@@ -57,7 +57,7 @@ void load_doanh_thu() {
 }
 
 // Thay đổi hàm read_from_file() để tương thích Windows
-void read_parking_data() {
+void read_from_file() {
     FILE *pt = fopen("parking_data.txt", "r");
     if (pt == NULL) {
         pt = fopen("parking_data.txt", "w"); // Tạo file nếu chưa có
@@ -252,7 +252,7 @@ g_signal_connect(search_entry, "changed", G_CALLBACK(on_search_changed), shared_
 g_signal_connect(btn2, "clicked", G_CALLBACK(ThanhtoanvaXoa), shared_data);
 
  load_doanh_thu();
-read_parking_data();
+read_from_file();
 load_treeviews(shared_data);
 
 // Kết nối nút với callback và truyền shared_data
