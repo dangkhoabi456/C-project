@@ -48,8 +48,7 @@ void read_from_file() {
         tm_time.tm_sec = sec;
 
         temp.entry_time = mktime(&tm_time);
-        temp.clock_start = clock() - (clock_t)(difftime(time(NULL), temp.entry_time) * CLOCKS_PER_SEC);
-
+        
         if (num_vehicles < MAX_SLOTS) {
             vehicle_list[num_vehicles++] = temp;
         }
