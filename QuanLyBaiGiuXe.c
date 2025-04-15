@@ -22,6 +22,7 @@ typedef struct {
 
 #define MAX_SLOTS 100
 vehicle vehicle_list[MAX_SLOTS];
+void load_history_data(GtkListStore *store);
 int num_vehicles = 0;
 double doanh_thu = 0;  // biến toàn cục
 GtkWidget *label_stats; // Dùng để cập nhật hiển thị thống kê
@@ -260,16 +261,91 @@ g_signal_connect(btn1, "clicked", G_CALLBACK(onNhapBienSoXe), shared_data);
     
 // Thêm notebook vào container chính
 gtk_box_pack_start(GTK_BOX(containerBox), notebook, TRUE, TRUE, 5);
-  
+
+// Tạo scrolled window chứa bảng lịch sử
+GtkWidget *scrolled_history = gtk_scrolled_window_new(NULL, NULL);
+gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_history), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+// Tạo TreeView
+GtkWidget *history_view = gtk_tree_view_new();
+gtk_container_add(GTK_CONTAINER(scrolled_history), history_view);
+
+// Tạo model cho TreeView
+GtkListStore *store = gtk_list_store_new(5,
+    G_TYPE_INT,     // STT
+    G_TYPE_STRING,  // Biển số xe
+    G_TYPE_STRING,  // Trạng thái
+    G_TYPE_STRING,  // Thời gian
+    G_TYPE_STRING   // Chi phí giữ xe (tạm dạng chuỗi)
+);
+gtk_tree_view_set_model(GTK_TREE_VIEW(history_view), GTK_TREE_MODEL(store));
+g_object_unref(store);
+load_history_data(store);
+
+// Thêm các cột
+const char *titles[] = {"STT", "Biển số xe", "Trạng thái", "Thời gian lúc lấy xe", "Chi phí giữ xe"};
+for (int i = 0; i < 5; i++) {
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(titles[i], renderer, "text", i, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(history_view), column);
+}
+
+// Thêm tab vào notebook
+gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled_history, gtk_label_new("Lịch sử giữ xe"));
 
 // Thêm vào cửa sổ & hiển thị
 gtk_container_add(GTK_CONTAINER(window), containerBox);
 gtk_widget_show_all(window);
     // Đọc dữ liệu và load vào TreeView khi app mở lên
-    
- 
 
 }
+void load_history_data(GtkListStore *store) {
+    FILE *log = fopen("log.txt", "r");
+    if (!log) return;
+
+    int stt = 1;
+    char license[20], status[10];
+    int fee;
+    char time_str[50];
+
+    while (!feof(log)) {
+        int read = fscanf(log, "%s %s", license, status);
+        if (read != 2) break;
+
+        GtkTreeIter iter;
+
+        if (strcmp(status, "out") == 0) {
+            fscanf(log, "%d %[^\n]", &fee, time_str);
+
+            char fee_str[20];
+            snprintf(fee_str, sizeof(fee_str), "%d VND", fee);
+
+            gtk_list_store_append(store, &iter);
+            gtk_list_store_set(store, &iter,
+                0, stt++,
+                1, license,
+                2, "Ra",
+                3, time_str,
+                4, fee_str,
+                -1
+            );
+        } else {
+            fscanf(log, "%[^\n]", time_str);
+            gtk_list_store_append(store, &iter);
+            gtk_list_store_set(store, &iter,
+                0, stt++,
+                1, license,
+                2, "Vào",
+                3, time_str,
+                4, "-", // Không có phí lúc vào
+                -1
+            );
+        }
+    }
+
+    fclose(log);
+}
+
 // Hàm kiểm tra cú pháp biển số
 int Check__license_plate(const char *a) {
     int count = 0;
