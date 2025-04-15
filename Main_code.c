@@ -21,7 +21,7 @@ double doanh_thu = 0;  // Thay vì dùng total
 void Cal_total(double fee);
 void save_doanh_thu();
 void load_doanh_thu();
-
+void rewrite_parking_file();
 
 
 void read_from_file() {
@@ -54,6 +54,16 @@ void read_from_file() {
         }
     }
     fclose(pt);
+}
+void rewrite_parking_file() {
+    FILE *f = fopen("parking_data.txt", "w");
+    if (!f) return;
+    for (int i = 0; i < num_vehicles; i++) {
+        char time_str[26];
+        strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&vehicle_list[i].entry_time));
+        fprintf(f, "%s %d %s %d\n", vehicle_list[i].license_plate, vehicle_list[i].fee, time_str, vehicle_list[i].floor);
+    }
+    fclose(f);
 }
 
 int has_available_slot() {
@@ -200,6 +210,7 @@ void remove_vehicle(const char *license_plate) {
         }
     }
     printf("Vehicle removed.\n");
+    rewrite_parking_file();
 }
 void save_doanh_thu() {
     FILE *f = fopen("doanh_thu.txt", "w");
